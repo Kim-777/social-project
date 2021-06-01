@@ -2,6 +2,10 @@
   --progressBar: #54d1db;
 }
 
+* {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
 body {
   background: var(--bodyBg);
 }
