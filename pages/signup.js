@@ -13,8 +13,13 @@ import {
     HeaderMessage,
     FooterMessage,
 } from "../components/Common/WelcomeMessage";
+import axios from 'axios';
+import baseUrl from '../utils/baseUrl';
+import { registerUser } from '../utils/authUser';
+import uploadPic from "../utils/uploadPicToCloudinary";
 
-export const regexUserName = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;;
+const regexUserName = /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]+$/;
+let cancel;
 
 const Signup = () => {
     const [user, setUser] = useState({
@@ -48,8 +53,20 @@ const Signup = () => {
 
     const inputRef = useRef();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setFormLoading(true);
+
+        let profilePicUrl;
+        if(media!==null) {
+            profilePicUrl = await uploadPic(media);
+        }
+        if(media!==null && !profilePicUrl) {
+            setFormLoading(false);
+            return setErrorMsg('Error Uploading Image');
+        }
+
+        await registerUser(user, profilePicUrl, setErrorMsg, setFormLoading);
     };
 
     useEffect(() => {
@@ -59,7 +76,47 @@ const Signup = () => {
         } else {
             setSubmitDisabled(true);
         }
-    }, [user])
+    }, [user]);
+
+    const checkUsername = async () => {
+
+        setUsernameLoading(true);
+
+        try {
+
+            cancel && cancel();
+
+            const CancelToken = axios.CancelToken;
+
+            const res = await axios.get(`${baseUrl}/api/signup/${username}`, {
+                cancelToken: new CancelToken(canceler => {
+                    cancel = canceler;
+                })
+            })
+
+            if(errorMsg!==null) setErrorMsg(null);
+            // console.log('checkUsername');
+            // console.log(`res`, res);
+            if(res.data === "Available") {
+                setUsernameAvailable(true);
+                setUser(prev => ({
+                    ...prev,
+                    username
+                }))
+                // console.log('checkUsername success');
+            }
+        } catch (error) {
+            setErrorMsg('Username Not Available');
+            // console.log('checkUsername false');
+            setUsernameAvailable(false);
+        }
+
+        setUsernameLoading(false);
+    }
+
+    useEffect(() => {
+        username ==="" ? setUsernameAvailable(false) : checkUsername()
+    }, [username]);
 
     const handleChange = (e) => {
         const {name, value, files } = e.target;

@@ -10,7 +10,7 @@ export const HeaderMessage = () => {
     return (
         <Message 
             attached
-            success
+            color="teal"
             header={signupRoute ? "회원가입😁" : "환영합니다😎"}
             icon={signupRoute ? "settings" : "privacy"}
             content={signupRoute ? "회원가입 하러 가기" : "이메일로 로그인하기"}

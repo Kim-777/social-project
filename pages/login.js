@@ -3,6 +3,7 @@ import { Form, Button, Message, Segment, Divider } from 'semantic-ui-react';
 import baseUrl from '../utils/baseUrl';
 import axios from 'axios';
 import { HeaderMessage, FooterMessage } from '../components/Common/WelcomeMessage';
+import { loginUser } from '../utils/authUser'
 
 const Login = () => {
 
@@ -31,8 +32,10 @@ const Login = () => {
         isUser ? setSubmitDisabled(false) : setSubmitDisabled(true);
     })
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        await loginUser(user, setErrorMsg, setFormLoading);
     }
 
     return (
