@@ -5,16 +5,27 @@ import 'semantic-ui-css/semantic.min.css';
 
 class MyApp extends App {
 
-    render() {
-        const {Component} = this.props;
+    static async getInitialProps({Component, ctx}) {
+        // console.log(appContext);
 
-        return (
-            <Layout>
-                <Component />
-            </Layout>
-        )
+        let pageProps = {};
+
+        if(Component.getInitialProps) {
+            pageProps = await Component.getInitialProps(ctx);
+        }
+
+        return { pageProps };
     }
 
+    render() {
+        const { Component, pageProps } = this.props;
+
+        return (
+            <Layout {...pageProps}>
+                <Component {...pageProps} />
+            </Layout>
+        );
+    }
 }
 
 export default MyApp
