@@ -13,7 +13,7 @@ export const HeaderMessage = () => {
             color="teal"
             header={signupRoute ? "회원가입😁" : "환영합니다😎"}
             icon={signupRoute ? "settings" : "privacy"}
-            content={signupRoute ? "회원가입 하러 가기" : "이메일로 로그인하기"}
+            content={signupRoute ? "우리 웹의 회원이 되어주세요!" : "이메일로 로그인하기"}
         />
 
     )
@@ -51,8 +51,8 @@ export const FooterMessage = () => {
                         처음오셨나요? <Link href="/signup">
                             회원가입
                         </Link>
-                        하러가기
                         {" "}
+                        하러가기
                     </Message>
                 </>
             )}

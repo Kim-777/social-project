@@ -10,10 +10,13 @@ const connectDb = require("./utilsServer/connectDb");
 const PORT = process.env.PORT || 3000;
 app.use(express.json()); // this is the body parser
 connectDb();
+
+
 nextApp.prepare().then(() => {
 
     app.use('/api/auth', require('./api/auth'));
     app.use('/api/signup', require('./api/signup'));
+    app.use('/api/search', require("./api/search"));
 
     app.all("*", (req, res) => handle(req, res));
     server.listen(PORT, err => {
