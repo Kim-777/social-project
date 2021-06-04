@@ -24,7 +24,9 @@ bower_components
 .env
 /.next/*
 .next/*
+.next
 
+config.env
 
 
 *.sublime*
