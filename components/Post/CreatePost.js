@@ -80,7 +80,7 @@ function CreatePost({ user, setPosts}) {
                 <Form.Group>
                     <Image src={user.profilePicUrl} circular avatar inline />
                     <Form.TextArea 
-                        placeholder="What's Happening"
+                        placeholder="추억을 남기세요"
                         name="text"    
                         value={newPost.text}
                         onChange={handleChange}
@@ -94,9 +94,9 @@ function CreatePost({ user, setPosts}) {
                         value={newPost.location}
                         name="location"
                         onChange={handleChange}
-                        label="Add Location"
+                        label="장소"
                         icon="map marker alternate"
-                        placeholder="Want to add Location"
+                        placeholder="장소를 추가 하세요"
                     />
 
                     <input 
