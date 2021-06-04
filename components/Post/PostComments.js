@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {Comment, Icon} from 'semantic-ui-react';
 import calculateTime from '../../utils/calculateTime';
+import { deleteComment } from '../../utils/postActions';
+
 
 function PostComments({ comment, user, setComments, postId }) {
 
@@ -22,7 +24,16 @@ function PostComments({ comment, user, setComments, postId }) {
                         <Comment.Actions>
                             <Comment.Action>
                                 {(user.role === 'root' || comment.user._id === user._id) && (
-                                    <Icon disabled={disabled} color="red" name="trash" />
+                                    <Icon 
+                                        disabled={disabled} 
+                                        color="red" 
+                                        name="trash" 
+                                        onClick={() => {
+                                            setDisabled(true);
+                                            deleteComment(postId, comment._id, setComments);
+                                            setDisabled(false);
+                                        }}
+                                    />
                                 )}
                             </Comment.Action>
                         </Comment.Actions>

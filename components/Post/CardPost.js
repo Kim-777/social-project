@@ -14,7 +14,9 @@ import PostComments from './PostComments';
 import CommentInputField from './CommentInputField';
 import calculateTime from '../../utils/calculateTime';
 import Link from 'next/link';
-import { deletePost } from '../../utils/postActions';
+import { deletePost, likePost } from '../../utils/postActions';
+import LikesList from './LikesList';
+
 
 function CardPost({ post, user, setPosts, setShowToastr}) {
 
@@ -100,13 +102,19 @@ function CardPost({ post, user, setPosts, setShowToastr}) {
                             name={isLiked? 'heart' : 'heart outline'}
                             color="red"
                             style={{ cursor: "pointer"}}
+                            onClick={() => likePost(post._id, user._id, setLikes, isLiked ? false : true)}
                         />
 
-                        {likes.length > 0 && (
-                            <span className="spanLikesList">
-                                {`${likes.length} ${likes.length===1? "like" : "likes"}`}
-                            </span>
-                        )}
+                        <LikesList 
+                            postId={post._id}
+                            trigger={
+                                likes.length > 0 && (
+                                    <span className="spanLikesList">
+                                        {`${likes.length} ${likes.length===1? "like" : "likes"}`}
+                                    </span>
+                                )
+                            }
+                        />
 
                         <Icon
                             name="comment outline"
@@ -130,7 +138,7 @@ function CardPost({ post, user, setPosts, setShowToastr}) {
 
                         {comments.length > 3 && (
                             <Button 
-                                ontent="View More" 
+                                content="View More" 
                                 color="teal"
                                 basic
                                 circular
