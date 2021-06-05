@@ -1,5 +1,7 @@
 import React from "react";
 import { Form, Segment, Image, Icon, Header } from "semantic-ui-react";
+import { useRouter } from 'next/router';
+
 
 function ImageDropDiv({
     highlighted,
@@ -9,7 +11,12 @@ function ImageDropDiv({
     mediaPreview,
     setMediaPreview,
     setMedia,
+    profilePicUrl
 }) {
+
+    const router = useRouter();
+    const signupRoute = router.pathname === "/signup";
+
     return (
         <>
             <Form.Field>
@@ -53,6 +60,9 @@ function ImageDropDiv({
                                     placeholder
                                     basic
                                 >
+
+
+                                {signupRoute ? (
                                     <Header icon>
                                         <Icon
                                             name="file image outline"
@@ -63,6 +73,18 @@ function ImageDropDiv({
                                         />
                                         이미지를 올리거나 클릭해서 업로드하세요
                                     </Header>
+                                ) : (
+                                    <span style={{textAlign: "center"}}>
+                                        <Image 
+                                            src={profilePicUrl} 
+                                            style={{cursor:"pointer"}}
+                                            onClick={() => inputRef.current.click()}
+                                            size="huge"
+                                            centered
+                                        />
+                                    </span>
+                                )}
+                                    
                                 </Segment>
                             </>
                         ) : (

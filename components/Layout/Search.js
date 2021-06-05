@@ -16,12 +16,11 @@ function SearchComponent() {
     const handleChange = async e => {
 
         const { value } = e.target;
-        
+        setText(value);    
         if(value.length === 0) return;
         
         if(value.trim().length === 0) return;
-        
-        setText(value);
+    
         setLoading(true);
 
         try {
@@ -39,7 +38,6 @@ function SearchComponent() {
             if(res.data.length === 0) {
 
                 results.length > 0 && setResults([]);
-
                 return setLoading(false);
             }
             setResults(res.data);

@@ -27,7 +27,7 @@ router.get('/:username', authMiddleware, async (req, res) => {
         return res.json({
             profile,
             followersLength: profileFollowStats.followers.length > 0 ? profileFollowStats.followers.length : 0,
-            followingLenght: profileFollowStats.following.length > 0 ?
+            followingLength: profileFollowStats.following.length > 0 ?
             profileFollowStats.following.length : 0,
         })
 
@@ -91,7 +91,7 @@ router.get('/following/:userId', authMiddleware, async (req, res) => {
     try {
 
         const user = await FollowerModel.findOne({user: userId})
-            .populate('fllowin.user');
+            .populate('following.user');
 
 
         return res.json(user.following);
@@ -184,8 +184,8 @@ router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
 // Update profile
 router.post("/update", authMiddleware, async (req, res) => {
 
-    const { bio, facebook, youtube, twitter, instagram, profilePicUrl } = req.body.user;
     const { userId } = req;
+    const { bio, facebook, youtube, twitter, instagram, profilePicUrl } = req.body;
 
     try {
 
@@ -210,7 +210,7 @@ router.post("/update", authMiddleware, async (req, res) => {
         if(profilePicUrl) {
 
             const user = await UserModel.findById(userId)
-            user.profilePirUrl = profilePicUrl;
+            user.profilePicUrl = profilePicUrl;
             await user.save();
         }
 

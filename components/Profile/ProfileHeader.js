@@ -8,6 +8,8 @@ import {
     Button,
     List,
 } from "semantic-ui-react";
+import { followUser, unfollowUser } from '../../utils/profileActions';
+
 
 function ProfileHeader({
     profile,
@@ -15,6 +17,11 @@ function ProfileHeader({
     loggedUserFollowStats,
     setLoggedUserFollowStats,
 }) {
+
+    useEffect(() => {
+        console.log(profile);
+    }, [])
+
     const [loading, setLoading] = useState(false);
     const isFollowing =
         loggedUserFollowStats.following.length > 0 &&
@@ -141,6 +148,12 @@ function ProfileHeader({
                                 content={isFollowing ? "Following" : "Follow"}
                                 icon={isFollowing ? "check circle" : "add user"}
                                 color={isFollowing ? "instagram" : "twitter"}
+                                onClick={async () => {
+                                    setLoading(true);
+                                    isFollowing ? await unfollowUser(profile.user._id, setLoggedUserFollowStats) :
+                                    await followUser(profile.user._id, setLoggedUserFollowStats)
+                                    setLoading(false);
+                                }}
                             />
                         )}
                     </Grid.Column>
