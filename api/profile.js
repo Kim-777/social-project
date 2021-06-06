@@ -5,7 +5,7 @@ const UserModel = require('../models/UserModel');
 const ProfileModel = require('../models/ProfileModel');
 const FollowerModel = require('../models/FollowerModel');
 const PostModel = require('../models/PostModel');
-
+const bcrypt = require('bcryptjs');
 
 // Get profile info;
 router.get('/:username', authMiddleware, async (req, res) => {
@@ -226,9 +226,9 @@ router.post("/update", authMiddleware, async (req, res) => {
 // Update password
 router.post("/settings/password", authMiddleware, async (req, res) => {
     try {
-
+        // console.log(req.userId);
         const { currentPassword, newPassword } = req.body;
-
+        // console.log('currentPassword', currentPassword);
         if(newPassword.length < 6) {
             return res.status(401).send('Password must be atleast 6 characters');
         }
@@ -244,6 +244,7 @@ router.post("/settings/password", authMiddleware, async (req, res) => {
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
+        return res.status(200).send("Updated");
 
     } catch (error) {
         console.error(error);

@@ -145,7 +145,9 @@ function ProfilePage({
                     )}
 
                     {activeItem === "settings" && (
-                        <Settings />
+                        <Settings 
+                            newMessagePopup={user.newMessagePopup}
+                        />
                     )}
 
                 </Grid.Column>
