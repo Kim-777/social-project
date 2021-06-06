@@ -11,9 +11,9 @@ import {
 import { range } from "lodash";
 
 export const PlaceHolderPosts = () =>
-  range(1, 3).map(item => (
+  range(1, 3).map((item, i) => (
     <>
-      <Placeholder key={item} fluid>
+      <Placeholder key={`${item}${i}`} fluid>
         <Placeholder.Header image>
           <Placeholder.Line />
           <Placeholder.Line />

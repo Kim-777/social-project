@@ -5,6 +5,12 @@ const UserModel = require('../models/UserModel');
 const PostModel = require('../models/PostModel');
 const FollowerModel = require('../models/FollowerModel');
 const uuid = require('uuid').v4;
+const {
+    newLikeNotification,
+    removeLikeNotification,
+    newCommentNotification,
+    removeCommentNotification,
+} = require('../utilsServer/notificationActions')
 
 // Create a post
 router.post('/', authMiddleware, async (req, res) => {
@@ -223,6 +229,10 @@ router.post('/like/:postId', authMiddleware, async (req, res) => {
         await post.likes.unshift({user: userId});
         await post.save();
 
+        if(post.user.toString() !== userId) {
+            await newLikeNotification(userId, postId, post.user.toString())
+        }
+
         return res.status(200).send('Post liked')
 
     } catch (error) {
@@ -257,6 +267,10 @@ router.put('/unlike/:postId', authMiddleware, async (req, res) => {
 
         await post.likes.splice(index, 1);
         await post.save();
+
+        if(post.user.toString() !== userId) {
+            await removeLikeNotification(userId, postId, post.user.toString());
+        }
 
         return res.status(200).send('Post Unliked')
 
@@ -294,6 +308,7 @@ router.post('/comment/:postId', authMiddleware, async (req, res) => {
 
     try {
         const { postId } = req.params;
+        const { userId } = req;
         const { text } = req.body;
 
         if(text.length < 1) return res.status(401).send('Comment should be atleast 1 character');
@@ -305,12 +320,16 @@ router.post('/comment/:postId', authMiddleware, async (req, res) => {
         const newComment = {
             _id: uuid(),
             text,
-            user: req.userId,
+            user: userId,
             date: Date.now(),
         }
 
         await post.comments.unshift(newComment);
         await post.save();
+
+        if(post.user.toString() !== userId) {
+            await newCommentNotification(postId, newComment._id, userId, post.user.toString(), text)
+        }
 
         return res.status(200).send(newComment._id);
 
@@ -345,6 +364,11 @@ router.delete('/:postId/:commentId', authMiddleware, async (req, res) => {
             const indexOf = post.comments.map(comment => comment._id).indexOf(commentId);
             await post.comments.splice(indexOf, 1);
             await post.save();
+
+            if(post.user.toString() !== userId) {
+                await removeCommentNotification(postId, commentId, userId, post.user.toString());
+            }
+
             return res.status(200).send('Deleted Successfully');
         }
 
