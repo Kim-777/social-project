@@ -8,6 +8,11 @@ import Chat from '../components/Chats/Chat';
 import ChatListSearch from '../components/Chats/ChatListSearch';
 import { useRouter } from 'next/router';
 import { NoMessages } from '../components/Layout/NoData';
+import MessageInputField from '../components/Messages/MessageInputField';
+import Message from '../components/Messages/Message';
+import Banner from '../components/Messages/Banner';
+import getUserInfo from '../utils/getUserInfo';
+
 
 function Messages({ chatsData, user }) {
 
@@ -23,6 +28,7 @@ function Messages({ chatsData, user }) {
     // This ref is the query string inside url
     const openChatId=useRef("");
 
+    //Connection
     useEffect(() => {
 
         if(!socket.current) {
@@ -50,26 +56,73 @@ function Messages({ chatsData, user }) {
 
     }, []);
 
+
+    // Load Messages
     useEffect(() => {
         const loadMessages = () => {
             socket.current.emit('loadMessages', {userId: user._id, messagesWith:router.query.message});
 
             socket.current.on('messagesLoaded', ({chat}) => {
-                
                 setMessages(chat.messages);
                 setBannerData({name:chat.messagesWith.name, profilePicUrl: chat.messagesWith.profilePicUrl})
-
-
                 openChatId.current = chat.messagesWith._id;
+            });
+
+            socket.current.on('noChatFound', async () => {
+                const { name, profilePicUrl } = await getUserInfo(router.query.message);
+
+                setBannerData({name, profilePicUrl});
+                setMessages([]);
+                openChatId.current = router.query.message;
             })
+
         };
 
-
-
-        if(socket.current) {
+        if(socket.current && router.query.message) {
             loadMessages();
         }
     }, [router.query.message])
+
+    const sendMsg = msg => {
+
+        if(socket.current) {
+            socket.current.emit('sendNewMsg', {
+                userId: user._id, 
+                msgSendToUserId: openChatId.current,
+                msg
+            })
+        }
+    };
+
+    // Confirming msg is sent and receving the messages
+    useEffect(() => {
+
+        if(socket.current) {
+            socket.current.on('msgSend', ({newMsg})=> {
+
+                // console.log('받았음 msgSend');
+                // console.log('newMsg.receiver', newMsg.receiver);
+                // console.log('openChatId.current', openChatId.current)
+
+                if(newMsg.receiver === openChatId.current) {
+                    setMessages(prev => [...prev, newMsg]);
+
+                    setChats(prev => {
+
+                        const previousChat = prev.find(chat => chat.messagesWith === newMsg.receiver);
+                        previousChat.lastMessage=newMsg.msg;
+                        previousChat.date= newMsg.date;
+
+                        return [...prev];
+
+                    })
+
+                }
+
+            })
+        }
+
+    }, []);
 
     return (
         <>
@@ -92,7 +145,7 @@ function Messages({ chatsData, user }) {
                     <ChatListSearch chats={chats} setChats={setChats} />
                 </div>
 
-                {chats.length > 0 ? <>
+                {chats.length > 0 ? (<>
                     <Grid stackable>
                         <Grid.Column width={4}>
                             <Comment.Group size="big">
@@ -112,8 +165,45 @@ function Messages({ chatsData, user }) {
                                 </Segment>
                             </Comment.Group>
                         </Grid.Column>
+
+                        <Grid.Column width={12}>
+                            {router.query.message && (
+                                <>
+                                    <div style={{
+                                        overflow: "auto", 
+                                        overflowX:"hidden",
+                                        maxHeight:"35rem",
+                                        height:"35rem",
+                                        backgroundColor: "whitesmoke"
+                                    }}
+                                    >
+                                    <div style={{position: "sticky", top: "0"}}>
+                                        <Banner bannerData={bannerData} />
+                                    </div>
+                                        <>
+                                            {messages.length > 0 && (
+                                                <>
+                                                {messages.map((message, i) => (
+                                                    <Message 
+                                                        key={i}
+                                                        bannerProfilePic={bannerData.profilePicUrl}
+                                                        message={message}
+                                                        user={user} 
+                                                        setMessages={setMessages}
+                                                        messagesWith={openChatId.current}
+                                                />))}                                                
+                                                </>
+                                            )}
+                                        </>
+                                    </div>
+                                    <MessageInputField 
+                                        sendMsg={sendMsg}
+                                    />
+                                </>
+                            )}
+                        </Grid.Column>
                     </Grid>
-                </> : <NoMessages />}
+                </> ): (<NoMessages />)}
 
             </Segment>
         </>

@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json()); // this is the body parser
 connectDb();
 const { addUser, removeUser } = require('./utilsServer/roomActions');
-const { loadMessages } = require('./utilsServer/messageActions');
+const { loadMessages, sendMsg } = require('./utilsServer/messageActions');
 
 io.on('connection', socket => {
 
@@ -29,14 +29,32 @@ io.on('connection', socket => {
     socket.on('loadMessages', async ({userId, messagesWith}) => {
 
         const { chat, error } = await loadMessages(userId, messagesWith);
-
+        // console.log('error????', error);
+        // console.log('chat????', chat);
         if(!error) {
             socket.emit('messagesLoaded', { chat });
         } else {
-            console.log('error!!!!', error);
+            socket.emit('noChatFound')
         }
 
     })
+
+
+    socket.on('sendNewMsg', async ({userId, msgSendToUserId, msg}) => {
+
+        const { newMsg, error } = await sendMsg(userId, msgSendToUserId, msg);
+
+        console.log('sendMsg 완료', newMsg );
+
+        if(!error) {
+            // console.log('이거 되고 있는거 맞지??')
+            socket.emit('msgSend', { newMsg });
+        } else {
+            console.log('sendNewMsg error', error);
+        }
+
+    })
+
 
     socket.on('disconnect', () => {
         removeUser(socket.id);
