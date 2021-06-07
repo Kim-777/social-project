@@ -3,9 +3,11 @@ import { Divider, Comment, Icon, List } from 'semantic-ui-react';
 import { useRouter } from 'next/router';
 import calculateTime from '../../utils/calculateTime';
 
-function Chat({ chat, setChats }) {
+function Chat({ chat, setChats, connectedUsers }) {
 
     const router = useRouter();
+
+    const isOnline = connectedUsers.length > 0 && connectedUsers.filter(user => user.userId === chat.messagesWith).length > 0;
 
     return (
         <>
@@ -20,7 +22,8 @@ function Chat({ chat, setChats }) {
                         <Comment.Avatar src={chat.profilePicUrl} />
                         <Comment.Content>
                             <Comment.Author as="a">
-                                {chat.name}
+                                {chat.name}{" "}
+                                {isOnline && <Icon name="circle" size="small" color="green" />}
                             </Comment.Author>
                             <Comment.Metadata>
                                 <div>{calculateTime(chat.date)}</div>
