@@ -1,6 +1,8 @@
 import React from 'react';
 import { Feed } from 'semantic-ui-react';
 import calculateTime from '../../utils/calculateTime';
+import Link from 'next/link';
+
 
 function LikeNotification({ notification }) {
     
@@ -25,9 +27,9 @@ function LikeNotification({ notification }) {
                     </Feed.Summary>
 
                     {notification.post.picUrl && <Feed.Extra images>
-                        <a href={`/post/${notification.post._id}`}>
+                        <Link href={`/post/${notification.post._id}`}>
                             <img src={notification.post.picUrl} />
-                        </a>
+                        </Link>
                     </Feed.Extra>}
 
                 </Feed.Content>

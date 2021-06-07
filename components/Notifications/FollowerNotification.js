@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Feed, Button } from "semantic-ui-react";
 import calculateTime from "../../utils/calculateTime";
 import { followUser, unfollowUser } from '../../utils/profileActions'
+import Link from 'next/link';
+
 function FollowerNotification({ 
     notification, 
     loggedUserFollowStats,
