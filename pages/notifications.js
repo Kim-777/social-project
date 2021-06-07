@@ -3,7 +3,7 @@ import axios from 'axios';
 import baseUrl from '../utils/baseUrl';
 import { parseCookies } from 'nookies';
 import cookie from 'js-cookie';
-import { NoNotifications } from '../components/Layout/NoData';
+import { NoMessages } from '../components/Layout/NoData';
 import LikeNotification from '../components/Notifications/LikeNotification';
 import CommentNotification from '../components/Notifications/CommentNotification'
 import FollowerNotification from '../components/Notifications/FollowerNotification'
@@ -19,7 +19,7 @@ function Notifications({ notifications, errorLoading, user, userFollowStats }) {
         const notificationRead = async () => {
 
             try {
-                const res = await axios.post(`${baseUrl}/api/notifications`, 
+                await axios.post(`${baseUrl}/api/notifications`, 
                     {},
                     { headers: {Authorization: cookie.get('token')} }
                 );
@@ -50,7 +50,7 @@ function Notifications({ notifications, errorLoading, user, userFollowStats }) {
                             }}
                         >
                             <Feed size="small">
-                                {notifications.map(notification => (<>
+                                {notifications && notifications.map(notification => (<>
                                     {
                                         notification.type === "newLike" &&
                                         notification.post !== null &&
@@ -85,7 +85,7 @@ function Notifications({ notifications, errorLoading, user, userFollowStats }) {
                         </div>
                     </Segment>
                 ) : (
-                    <NoNotifications />
+                    <NoMessages />
                 )}
                 <Divider hidden />
             </Container>

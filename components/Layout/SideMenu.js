@@ -21,7 +21,7 @@ function SideMenu({ user: {unreadNotification, email, unreadMessage, username}})
 
                 <Link href="/">
                     <List.Item active={isActive('/')}>
-                        <Icon name="home" size="large" color={isActive('/') && 'teal'} />
+                        <Icon name="home" size="large" color={(isActive('/') && 'teal') || 'black'} />
                         <List.Content>
                             <List.Header content="Home" />
                         </List.Content>
@@ -34,7 +34,8 @@ function SideMenu({ user: {unreadNotification, email, unreadMessage, username}})
                         <Icon 
                             name={unreadMessage? "hand point right": "mail outline"} 
                             size="large" 
-                            color={(isActive('/messages') && 'teal') || (unreadMessage && 'orange')}/>
+                            color={(isActive('/messages') && 'teal') || (unreadMessage && 'orange') || 'black'} 
+                        />
                         <List.Content>
                             <List.Header content="Messages" />
                         </List.Content>
@@ -47,7 +48,7 @@ function SideMenu({ user: {unreadNotification, email, unreadMessage, username}})
                         <Icon 
                             name={unreadNotification? "hand point right": "bell outline"} 
                             size="large" 
-                            color={(isActive('/notifications') && 'teal') || (unreadNotification && 'orange')}/>
+                            color={(isActive('/notifications') && 'teal') || (unreadNotification && 'orange') || 'black'}/>
                         <List.Content>
                             <List.Header content="Notifications" />
                         </List.Content>
@@ -57,7 +58,7 @@ function SideMenu({ user: {unreadNotification, email, unreadMessage, username}})
 
                 <Link href={`/${username}`}>
                     <List.Item active={router.query.username === username}>
-                        <Icon name="user" size="large" color={router.query.username === username && 'teal'} />
+                        <Icon name="user" size="large" color={(router.query.username === username && 'teal') || 'black'} />
                         <List.Content>
                             <List.Header content="Account" />
                         </List.Content>
