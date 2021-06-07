@@ -22,6 +22,35 @@ router.get('/', authMiddleware, async (req, res) => {
         return res.status(500).send(`Server Error`);
     }
     
+});
+
+router.post("/", authMiddleware, async (req, res) => {
+    
+    // console.log("왜 안들어와??..")
+
+    try {
+
+        const { userId } = req;
+
+        const user = await UserModel.findById(userId);
+        // console.log(`befor unreadNotification`)
+        // console.log(user.unreadNotification)
+        if(user.unreadNotification) {
+            user.unreadNotification = false;
+            await user.save();
+        }
+
+        // console.log(`after unreadNotification`)
+        // console.log(user.unreadNotification)
+
+        return res.status(200).send(`Updated`);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send("Server Error");
+    }
+
+
 })
 
 module.exports=router;
