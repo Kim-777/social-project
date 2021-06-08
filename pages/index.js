@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import io from 'socket.io-client';
 import axios from "axios";
 import baseUrl from "../utils/baseUrl";
 import CreatePost from "../components/Post/CreatePost";
@@ -10,6 +11,10 @@ import { PostDeleteToastr } from '../components/Layout/Toastr';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PlaceHolderPosts, EndMessage } from '../components/Layout/PlaceHolderGroup';
 import cookie from 'js-cookie';
+import getUserInfo from '../utils/getUserInfo';
+import MessageNotificationModal from '../components/Home/MessageNotificationModal';
+import newMsgSound from '../utils/newMsgSound';
+
 
 function Index({ user, postsData, errorLoading }) {
     const [posts, setPosts] = useState(postsData || []);
@@ -19,8 +24,44 @@ function Index({ user, postsData, errorLoading }) {
     const [pageNumber, setPageNumber] = useState(2);
     // console.log({user, userFollowStats});
 
+    const socket = useRef();
+
+    const [newMessageReceived, setNewMessageReceived] = useState(null);
+    const [newMessageModal, setNewMessageModal] = useState(false);
+
     useEffect(() => {
+
+        if(!socket.current) {
+            socket.current = io(baseUrl);
+        }
+
+        if(socket.current) {
+            socket.current.emit("join", {userId: user._id});
+
+            socket.current.on('newMsgReceived', async ({newMsg}) => {
+
+                const { name, profilePicUrl } = await getUserInfo(newMsg.sender);
+                // console.log('name', name);
+                // console.log('profilePicUrl', profilePicUrl);
+                // console.log('user.newMessagePopup', user.newMessagePopup)
+
+                if(user.newMessagePopup) {
+                    setNewMessageReceived({...newMsg, senderName: name, senderProfilePic: profilePicUrl});
+                    setNewMessageModal(true);
+                }
+
+                newMsgSound(name);
+            })
+        }
+
         document.title = `Welcome, ${user.name.split(" ")[0]}`;
+
+        return () => {
+            if(socket.current) {
+                socket.current.emit('disconnect');
+                socket.current.off();
+            }
+        }
     }, []);
 
     useEffect(() => {
@@ -47,13 +88,23 @@ function Index({ user, postsData, errorLoading }) {
         } catch (error) {
             console.log(`Error fetching Posts`)
         } 
-    }
+    };
 
 
 
     return (
         <>
             {showToastr && <PostDeleteToastr />}
+
+            {newMessageModal && newMessageReceived !== null && (
+                <MessageNotificationModal 
+                    socket={socket} 
+                    setNewMessageModal={setNewMessageModal}
+                    newMessageModal={newMessageModal}
+                    newMessageReceived={newMessageReceived}
+                    user={user}
+                />
+            )} 
             <Segment>
                 <CreatePost user={user} setPosts={setPosts} />
                 {posts.length === 0 || errorLoading ? <NoPosts /> : (

@@ -10,6 +10,9 @@ const getUserInfo = async (userToFindId) => {
             headers: { Authorization: cookie.get('token')}
         });
 
+        // console.log('getUserInfo res.data', res.data)
+        // const {name, profilePicUrl} = res.data;
+
         return {name: res.data.name, profilePicUrl: res.data.profilePicUrl}
 
     } catch (error) {

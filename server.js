@@ -46,6 +46,7 @@ io.on('connection', socket => {
         const receiverSocket = findConnectedUser(msgSendToUserId);
 
         if(receiverSocket) {
+            console.log('receiverSocket', newMsg)
             io.to(receiverSocket.socketId).emit('newMsgReceived', {newMsg})
         } else {
             await setMsgToUnread(msgSendToUserId);
@@ -74,6 +75,26 @@ io.on('connection', socket => {
 
     })
 
+    socket.on('sendMsgFromNotification', async ({userId, msgSendToUserId, msg}) => {
+        const { newMsg, error } = await sendMsg(userId, msgSendToUserId, msg);
+        const receiverSocket = findConnectedUser(msgSendToUserId);
+
+        if(receiverSocket) {
+            console.log('receiverSocket', newMsg)
+            io.to(receiverSocket.socketId).emit('newMsgReceived', {newMsg})
+        } else {
+            await setMsgToUnread(msgSendToUserId);
+        }
+
+        // console.log('sendMsg 완료', newMsg );
+
+        if(!error) {
+            // console.log('이거 되고 있는거 맞지??')
+            socket.emit('msgSentFromNotification');
+        } else {
+            console.log('msgSentFromNotification error', error);
+        }
+    })
 
     socket.on('disconnect', () => {
         removeUser(socket.id);
@@ -90,6 +111,7 @@ nextApp.prepare().then(() => {
     app.use('/api/profile', require('./api/profile'));
     app.use('/api/notifications', require('./api/notifications'));
     app.use('/api/chats', require('./api/chats'));
+    app.use('/api/reset', require('./api/reset'));
 
     app.all("*", (req, res) => handle(req, res));
     server.listen(PORT, err => {

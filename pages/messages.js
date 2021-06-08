@@ -13,7 +13,7 @@ import Message from '../components/Messages/Message';
 import Banner from '../components/Messages/Banner';
 import getUserInfo from '../utils/getUserInfo';
 import newMsgSound from '../utils/newMsgSound';
-
+import cookie from 'js-cookie';
 
 const scrollDivToBottom = divRef => {
     divRef.current!== null && divRef.current.scrollIntoView({behaviour: "smooth"})
@@ -193,6 +193,20 @@ function Messages({ chatsData, user }) {
             })
         }
 
+    };
+
+    const deleteChat = async messagesWith => {
+
+        try {
+            await axios.delete(`${baseUrl}/api/chats/${messagesWith}`, {
+                headers: { Authorization: cookie.get('token')}
+            });
+
+            setChats(prev => prev.filter(chat => chat.messagesWith !== messagesWith));
+            router.push('/messages', undefined, {shallow: true})
+        } catch (error) {
+            alert(`Error deleting chat`)
+        }
     }
 
     return (
@@ -230,7 +244,7 @@ function Messages({ chatsData, user }) {
                                         connectedUsers={connectedUsers}
                                         key={i}
                                         chat={chat}
-                                        setChats={setChats}
+                                        deleteChat={deleteChat}
                                     />))}
 
                                 </Segment>
@@ -254,10 +268,10 @@ function Messages({ chatsData, user }) {
                                         <>
                                             {messages.length > 0 && (
                                                 <>
-                                                {messages.map((message, i) => (
+                                                {messages.map((message) => (
                                                     <Message 
                                                         divRef={divRef}
-                                                        key={i}
+                                                        key={message._id}
                                                         bannerProfilePic={bannerData.profilePicUrl}
                                                         message={message}
                                                         user={user} 
