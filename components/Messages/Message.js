@@ -4,14 +4,14 @@ import calculateTime from '../../utils/calculateTime';
 
 
 
-function Message({ message, user, setMessages, messagesWith, bannerProfilePic}) {
+function Message({ message, user, deleteMsg, bannerProfilePic, divRef}) {
 
     const [deleteIcon, setDeleteIcon] = useState(false);
 
     const ifYouSender = message.sender === user._id
 
     return (
-        <div className="bubbleWrapper">
+        <div className="bubbleWrapper" ref={divRef}>
             <div 
                 className={ifYouSender ? "inlineContainer own" : "inlineContainer"}
                 onClick={() => {
@@ -25,7 +25,7 @@ function Message({ message, user, setMessages, messagesWith, bannerProfilePic}) 
 
                 {deleteIcon && (
                     <Popup 
-                        trigger={<Icon name="trash" color="red" style={{cursor: "pointer"}}/>} 
+                        trigger={<Icon name="trash" color="red" style={{cursor: "pointer"}} onClick={() =>deleteMsg(message._id)}/>} 
                         content="This will only delete the message from your inbox!"
                         position="top right"
                     />) 

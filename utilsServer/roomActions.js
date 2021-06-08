@@ -19,7 +19,7 @@ const addUser = async (userId, socketId) => {
 
     }
 
-}
+};
 
 const removeUser = async (socketId) => {
 
@@ -31,4 +31,6 @@ const removeUser = async (socketId) => {
 
 };
 
-module.exports = { addUser, removeUser }
+const findConnectedUser = userId => users.find(user => user.userId === userId);
+
+module.exports = { addUser, removeUser, findConnectedUser };

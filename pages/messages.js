@@ -12,6 +12,12 @@ import MessageInputField from '../components/Messages/MessageInputField';
 import Message from '../components/Messages/Message';
 import Banner from '../components/Messages/Banner';
 import getUserInfo from '../utils/getUserInfo';
+import newMsgSound from '../utils/newMsgSound';
+
+
+const scrollDivToBottom = divRef => {
+    divRef.current!== null && divRef.current.scrollIntoView({behaviour: "smooth"})
+}
 
 
 function Messages({ chatsData, user }) {
@@ -23,6 +29,8 @@ function Messages({ chatsData, user }) {
 
     const [messages, setMessages] = useState([]);
     const [bannerData, setBannerData] = useState({name: "", profilePicUrl: ""});
+
+    const divRef = useRef();
     
     // This ref is for persisting the state of query string in url throughout re-renders
     // This ref is the query string inside url
@@ -66,6 +74,7 @@ function Messages({ chatsData, user }) {
                 setMessages(chat.messages);
                 setBannerData({name:chat.messagesWith.name, profilePicUrl: chat.messagesWith.profilePicUrl})
                 openChatId.current = chat.messagesWith._id;
+                divRef.current && scrollDivToBottom(divRef);
             });
 
             socket.current.on('noChatFound', async () => {
@@ -108,21 +117,83 @@ function Messages({ chatsData, user }) {
                     setMessages(prev => [...prev, newMsg]);
 
                     setChats(prev => {
-
                         const previousChat = prev.find(chat => chat.messagesWith === newMsg.receiver);
                         previousChat.lastMessage=newMsg.msg;
                         previousChat.date= newMsg.date;
-
                         return [...prev];
+                    });
+                }
+            });
 
+
+            socket.current.on('newMsgReceived', async ({newMsg}) => {
+
+                let senderName;
+
+                if(newMsg.sender===openChatId.current) {
+                    setMessages(prev => [...prev, newMsg]);
+                    setChats(prev => {
+                        const previousChat = prev.find(chat => chat.messagesWith === newMsg.sender);
+                        previousChat.lastMessage = newMsg.msg;
+                        previousChat.date = newMsg.date;
+                        senderName = previousChat.name;
+                        return [...prev]
                     })
+                } else {
 
+                    const ifPreviouslyMessaged = chats.filter(chat => chat.messagesWith === newMsg.sender).length > 0;
+
+                    if(ifPreviouslyMessaged) {
+
+                        setChats(prev => {
+
+                            const previousChat = prev.find(chat => chat.messagesWith === newMsg.sender);
+                            previousChat.lastMessage = newMsg.msg;
+                            previousChat.date = newMsg.date;
+                            senderName = previousChat.name;
+
+                            return [...prev];
+                        });
+
+                    } else {
+
+                        const { name, profilePicUrl } = await getUserInfo(newMsg.sender);
+                        senderName = name;
+
+                        const newChat = {
+                            messagesWith: newMsg.sender,
+                            name,
+                            profilePicUrl,
+                            lastMessage: newMsg.msg,
+                            date: newMsg.date
+                        };
+
+                        setChats(prev=> [newChat,...prev])
+                    }
                 }
 
+                newMsgSound(senderName);
             })
         }
 
     }, []);
+
+    useEffect(() => {
+
+        messages.length > 0 && scrollDivToBottom(divRef);
+
+    }, [messages]);
+
+    const deleteMsg = (messageId) => {
+
+        if(socket.current) {
+            socket.current.emit('deleteMsg', {userId:user._id, messagesWith: openChatId.current, messageId});
+            socket.current.on('msgDeleted', () => {
+                setMessages(prev => prev.filter(message => message._id !== messageId));
+            })
+        }
+
+    }
 
     return (
         <>
@@ -185,13 +256,14 @@ function Messages({ chatsData, user }) {
                                                 <>
                                                 {messages.map((message, i) => (
                                                     <Message 
+                                                        divRef={divRef}
                                                         key={i}
                                                         bannerProfilePic={bannerData.profilePicUrl}
                                                         message={message}
                                                         user={user} 
-                                                        setMessages={setMessages}
-                                                        messagesWith={openChatId.current}
-                                                />))}                                                
+                                                        deleteMsg={deleteMsg}
+                                                    />
+                                                ))}                                                
                                                 </>
                                             )}
                                         </>

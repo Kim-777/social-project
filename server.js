@@ -11,8 +11,8 @@ const connectDb = require("./utilsServer/connectDb");
 const PORT = process.env.PORT || 3000;
 app.use(express.json()); // this is the body parser
 connectDb();
-const { addUser, removeUser } = require('./utilsServer/roomActions');
-const { loadMessages, sendMsg } = require('./utilsServer/messageActions');
+const { addUser, removeUser, findConnectedUser } = require('./utilsServer/roomActions');
+const { loadMessages, sendMsg, setMsgToUnread, deleteMsg } = require('./utilsServer/messageActions');
 
 io.on('connection', socket => {
 
@@ -37,14 +37,21 @@ io.on('connection', socket => {
             socket.emit('noChatFound')
         }
 
-    })
+    });
 
 
     socket.on('sendNewMsg', async ({userId, msgSendToUserId, msg}) => {
 
         const { newMsg, error } = await sendMsg(userId, msgSendToUserId, msg);
+        const receiverSocket = findConnectedUser(msgSendToUserId);
 
-        console.log('sendMsg 완료', newMsg );
+        if(receiverSocket) {
+            io.to(receiverSocket.socketId).emit('newMsgReceived', {newMsg})
+        } else {
+            await setMsgToUnread(msgSendToUserId);
+        }
+
+        // console.log('sendMsg 완료', newMsg );
 
         if(!error) {
             // console.log('이거 되고 있는거 맞지??')
@@ -53,13 +60,25 @@ io.on('connection', socket => {
             console.log('sendNewMsg error', error);
         }
 
+    });
+
+    socket.on('deleteMsg', async ({userId, messagesWith, messageId}) => {
+
+        const {success} = await deleteMsg(userId, messagesWith, messageId);
+
+        if(success) {
+            socket.emit('msgDeleted')
+        } else {
+            console.log('deleteMsg not success!!!!')
+        }
+
     })
 
 
     socket.on('disconnect', () => {
         removeUser(socket.id);
         console.log('User disconnected')
-    })
+    });
 })
 
 nextApp.prepare().then(() => {
