@@ -20,6 +20,9 @@ function Followers({
     const [followLoading, setFollowLoading] = useState(false);
 
     useEffect(() => {
+
+        console.log('loggedUserFollowStats', loggedUserFollowStats);
+
         const getFollowers = async () => {
             setLoading(true);
 
@@ -53,8 +56,12 @@ function Followers({
                     const isFollowing =
                         loggedUserFollowStats.following.length > 0 &&
                         loggedUserFollowStats.following.filter(
-                            (following) =>
-                                following.user === profileFollower.user._id
+                            (following) =>{
+                                // console.log('user._id', user._id);
+                                // console.log('following.user', following.user);
+                                // console.log('profileFollower.user._id', profileFollower.user._id) 
+                                return following.user === profileFollower.user._id || user._id === profileFollower.user._id
+                            }
                         ).length > 0;
 
                     return (

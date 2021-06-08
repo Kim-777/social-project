@@ -53,7 +53,7 @@ function Following({
                         loggedUserFollowStats.following.length > 0 &&
                         loggedUserFollowStats.following.filter(
                             (following) =>
-                                following.user === profileFollowing.user._id
+                                following.user === profileFollowing.user._id || user._id === profileFollowing.user._id
                         ).length > 0;
 
                     return (

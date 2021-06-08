@@ -26,6 +26,10 @@ io.on('connection', socket => {
         }, 10000);
     });
 
+    socket.on('likePost', async ({postId, userId, like}) => {
+        
+    })
+
     socket.on('loadMessages', async ({userId, messagesWith}) => {
 
         const { chat, error } = await loadMessages(userId, messagesWith);
