@@ -14,7 +14,7 @@ import cookie from 'js-cookie';
 import getUserInfo from '../utils/getUserInfo';
 import MessageNotificationModal from '../components/Home/MessageNotificationModal';
 import newMsgSound from '../utils/newMsgSound';
-
+import NotificationPortal from '../components/Home/NotificationPortal';
 
 function Index({ user, postsData, errorLoading }) {
     const [posts, setPosts] = useState(postsData || []);
@@ -29,6 +29,9 @@ function Index({ user, postsData, errorLoading }) {
     const [newMessageReceived, setNewMessageReceived] = useState(null);
     const [newMessageModal, setNewMessageModal] = useState(false);
 
+    const [newNotification, setNewNotification] = useState(null);
+    const [notificationPopup, setNotificationPopup] = useState(false);
+    
     useEffect(() => {
 
         if(!socket.current) {
@@ -90,10 +93,29 @@ function Index({ user, postsData, errorLoading }) {
         } 
     };
 
+    useEffect(() => {
+
+        if(socket.current) {
+            socket.current.on("newNotificationReceived", ({ name, profilePicUrl, username, postId }) => {
+                setNewNotification({ name, profilePicUrl, username, postId });
+                setNotificationPopup(true);
+            })
+        }
+
+    }, [])
+
 
 
     return (
         <>
+
+            {notificationPopup && newNotification!== null && (
+                <NotificationPortal 
+                    newNotification={newNotification}
+                    notificationPopup={notificationPopup}
+                    setNotificationPopup={setNotificationPopup}
+                />
+            )}
             {showToastr && <PostDeleteToastr />}
 
             {newMessageModal && newMessageReceived !== null && (
